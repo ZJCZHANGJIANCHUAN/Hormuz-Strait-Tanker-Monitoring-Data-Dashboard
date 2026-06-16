@@ -1,3 +1,11 @@
+<img width="2559" height="1187" alt="image" src="https://github.com/user-attachments/assets/13452eeb-ac85-4937-89b5-3033205143b2" />
+<img width="2223" height="780" alt="image" src="https://github.com/user-attachments/assets/812fdd3d-310b-4784-9973-c0c6ddb2f119" />
+<img width="2181" height="620" alt="image" src="https://github.com/user-attachments/assets/aad47dd0-8049-494e-97f4-9c994190bb7e" />
+<img width="2193" height="591" alt="image" src="https://github.com/user-attachments/assets/1a7d68dc-b16c-402b-a143-b0ed6ca5b409" />
+
+
+
+
 # 🛢️ 霍尔木兹海峡油轮监测数据看板
 
 实时监测霍尔木兹海峡石油航运态势的多维度数据看板，集成卫星 AIS 通行量、港口装船、国际油价、卫星火点和海上安全事件，通过多源交叉验证评估区域供应风险。

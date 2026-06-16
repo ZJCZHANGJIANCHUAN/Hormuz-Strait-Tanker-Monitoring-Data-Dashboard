@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  body { margin: 0; padding: 0; }
+  #map { width: 100%; height: 100vh; }
+  #error { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; color: #999; font: 14px sans-serif; z-index: 9999; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 8px; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="error">地图加载中...<br><small>如长时间无显示，请检查网络连接</small></div>
+<script>
+// Load Leaflet with fallback CDN
+function loadLeaflet() {
+  var s = document.createElement('script');
+  s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  s.onerror = function() {
+    // Fallback to jsDelivr
+    var s2 = document.createElement('script');
+    s2.src = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js';
+    s2.onerror = function() { document.getElementById('error').style.display = 'block'; };
+    s2.onload = init;
+    document.head.appendChild(s2);
+  };
+  s.onload = init;
+  document.head.appendChild(s);
+}
+
+function init() {
+  document.getElementById('error').style.display = 'none';
+
+  var FACILITIES = [
+    { name: 'Kharg Island', coords: [29.25, 50.30], country: '伊朗' },
+    { name: 'Ras Tanura', coords: [26.70, 50.15], country: '沙特' },
+    { name: 'Fujairah', coords: [25.12, 56.33], country: '阿联酋' },
+    { name: 'Das Island', coords: [25.15, 52.87], country: '阿联酋' },
+    { name: 'Ras Laffan', coords: [25.91, 51.58], country: '卡塔尔' },
+    { name: 'Ruwais', coords: [24.12, 52.73], country: '阿联酋' },
+    { name: 'Jubail', coords: [27.01, 49.66], country: '沙特' },
+    { name: 'Mina al-Ahmadi', coords: [29.08, 48.17], country: '科威特' },
+    { name: 'Asaluyeh', coords: [27.48, 52.61], country: '伊朗' },
+    { name: 'Basrah Terminal', coords: [29.67, 48.83], country: '伊拉克' },
+  ];
+
+  var map = L.map('map').setView([26.5, 52.5], 6);
+  // Use Gaode (高德) tiles — accessible from China
+  L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+    subdomains: '1234', maxZoom: 18,
+    attribution: '&copy; 高德地图'
+  }).addTo(map);
+
+  // Facility markers
+  FACILITIES.forEach(function(f) {
+    L.circleMarker(f.coords, { radius: 7, color: '#096dd9', fillColor: '#1677ff', fillOpacity: 1, weight: 2 })
+      .addTo(map)
+      .bindTooltip(f.name, { permanent: true, direction: 'right', offset: [6, 0] });
+  });
+
+  // Listen for fire data from parent
+  window.addEventListener('message', function(e) {
+    if (!e.data || e.data.type !== 'fire-data') return;
+    var fires = e.data.data || [];
+    if (!fires.length) return;
+
+    var highConf = fires.filter(function(f) { return f.confidence === 'high'; });
+    var otherConf = fires.filter(function(f) { return f.confidence !== 'high'; });
+
+    otherConf.forEach(function(f) {
+      var r = Math.max(3, Math.min(10, (f.frp || 1) * 2));
+      L.circleMarker([f.latitude, f.longitude], {
+        radius: r, color: '#faad14', fillColor: '#faad14', fillOpacity: 0.4, weight: 1
+      }).addTo(map).bindTooltip('<b>' + f.facility_name + '</b><br>FRP: ' + (f.frp||0).toFixed(1) + ' MW<br>' + f.confidence + ' · ' + f.country);
+    });
+
+    highConf.forEach(function(f) {
+      var r = Math.max(5, Math.min(16, (f.frp || 1) * 3));
+      L.circleMarker([f.latitude, f.longitude], {
+        radius: r, color: '#ff4d4f', fillColor: '#ff4d4f', fillOpacity: 0.45, weight: 2
+      }).addTo(map).bindTooltip('<b>⚠️ ' + f.facility_name + '</b><br>FRP: ' + (f.frp||0).toFixed(1) + ' MW<br>高置信度 · ' + f.country);
+    });
+  });
+
+  // Signal ready
+  window.parent.postMessage({ type: 'map-ready' }, '*');
+}
+
+loadLeaflet();
+</script>
+</body>
+</html>

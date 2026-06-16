@@ -1,0 +1,100 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Metric cards grid — responsive, no overflow */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* Chart panels grid */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.chart-panel {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chart-panel.full-width {
+  grid-column: 1 / -1;
+}
+
+.chart-panel h3 {
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: #333;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Source status indicator dots */
+.source-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.source-indicator.healthy { background: #52c41a; }
+.source-indicator.degraded { background: #faad14; }
+.source-indicator.warning { background: #ff7a45; }
+.source-indicator.stale { background: #ff4d4f; }
+.source-indicator.blocked { background: #ff4d4f; }
+.source-indicator.error { background: #ff4d4f; }
+.source-indicator.unknown { background: #d9d9d9; }
+
+/* ===== Responsive breakpoints ===== */
+@media (max-width: 1600px) {
+  .metrics-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .metrics-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .metrics-row {
+    grid-template-columns: 1fr;
+  }
+}

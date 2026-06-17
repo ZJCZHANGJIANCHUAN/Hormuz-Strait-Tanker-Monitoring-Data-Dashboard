@@ -165,4 +165,4 @@ HTTPS_PROXY=http://127.0.0.1:7890
 
 ## License
 
-MIT
+MIT  免费使用，禁止商用，欢迎各位大佬优化项目

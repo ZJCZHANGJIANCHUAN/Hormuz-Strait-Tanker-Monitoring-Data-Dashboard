@@ -28,13 +28,12 @@ export default function OverviewPage() {
 
   useEffect(() => {
     loadData();
-    const timer = setInterval(loadData, 5 * 60 * 1000); // refresh every 5 min
-    // Listen for UKMTO updates from risk page
-    const handleUkmtoUpdate = () => loadData();
-    window.addEventListener('ukmto-updated', handleUkmtoUpdate);
+    const handleRefresh = () => loadData();
+    window.addEventListener('dashboard-refresh', handleRefresh);
+    window.addEventListener('ukmto-updated', handleRefresh);
     return () => {
-      clearInterval(timer);
-      window.removeEventListener('ukmto-updated', handleUkmtoUpdate);
+      window.removeEventListener('dashboard-refresh', handleRefresh);
+      window.removeEventListener('ukmto-updated', handleRefresh);
     };
   }, [loadData]);
 

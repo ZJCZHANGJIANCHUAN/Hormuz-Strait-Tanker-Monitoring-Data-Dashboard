@@ -6,8 +6,11 @@ import type { StraitDataPoint } from '@/types';
 export default function TrafficChart() {
   const [data, setData] = useState<StraitDataPoint[]>([]);
 
+  const load = () => { fetchStraitData(90).then(setData).catch(() => {}); };
   useEffect(() => {
-    fetchStraitData(90).then(setData).catch(() => {});
+    load();
+    window.addEventListener('dashboard-refresh', load);
+    return () => window.removeEventListener('dashboard-refresh', load);
   }, []);
 
   // Separate data by source

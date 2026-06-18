@@ -10,14 +10,15 @@ from app.models import StraitPassage, PortLoading, ShippingIndex
 
 
 def seed_strait_passages(db):
-    """IEA strait baseline — skip if data already exists."""
-    existing = db.query(StraitPassage).filter(StraitPassage.source == "iea_baseline").count()
-    if existing > 0:
-        print(f"  StraitPassage: {existing} records exist, skip")
-        return 0
-
+    """IEA strait baseline — fill missing dates up to today."""
+    inserted = 0
     for i in range(90, -1, -1):
         d = date.today() - timedelta(days=i)
+        exist = db.query(StraitPassage).filter(
+            StraitPassage.record_date == d, StraitPassage.source == "iea_baseline"
+        ).first()
+        if exist:
+            continue
         noise = random.gauss(0, 1.5)
         db.add(StraitPassage(
             record_date=d,
@@ -28,18 +29,17 @@ def seed_strait_passages(db):
             total_capacity_tons=round(6200000 + random.uniform(-400000, 400000)),
             source="iea_baseline",
         ))
-    db.commit()
-    print(f"  StraitPassage: 91 records seeded")
-    return 91
+        inserted += 1
+    if inserted:
+        db.commit()
+        print(f"  StraitPassage: {inserted} new records (up to today)")
+    else:
+        print(f"  StraitPassage: up to date, skip")
+    return inserted
 
 
 def seed_port_loadings(db):
-    """IEA port baseline — skip if data already exists."""
-    existing = db.query(PortLoading).filter(PortLoading.source == "iea_baseline").count()
-    if existing > 0:
-        print(f"  PortLoading: {existing} records exist, skip")
-        return 0
-
+    """IEA port baseline — fill missing dates up to today."""
     ports = {
         "Kharg Island": ("IRKHK", 12, 0.83), "Ras Tanura": ("SARTA", 18, 0.78),
         "Fujairah": ("AEFJR", 8, 0.63), "Das Island": ("AEDAS", 6, 0.83),
@@ -47,9 +47,16 @@ def seed_port_loadings(db):
         "Basrah": ("IQBSR", 14, 0.79), "Jubail": ("SAJUB", 8, 0.75),
         "Ruwais": ("AERUW", 6, 0.83), "Yanbu": ("SAYNB", 8, 0.75),
     }
+    inserted = 0
     for i in range(90, -1, -1):
         d = date.today() - timedelta(days=i)
         for name, (code, tankers, ratio) in ports.items():
+            exist = db.query(PortLoading).filter(
+                PortLoading.record_date == d, PortLoading.port_name == name,
+                PortLoading.source == "iea_baseline"
+            ).first()
+            if exist:
+                continue
             loaded = round(tankers * ratio)
             ballast = tankers - loaded
             db.add(PortLoading(
@@ -58,33 +65,38 @@ def seed_port_loadings(db):
                 loaded_tankers=loaded, ballast_tankers=ballast,
                 loading_ratio=ratio, source="iea_baseline",
             ))
-    db.commit()
-    print(f"  PortLoading: 910 records seeded")
-    return 910
+            inserted += 1
+    if inserted:
+        db.commit()
+        print(f"  PortLoading: {inserted} new records (up to today)")
+    else:
+        print(f"  PortLoading: up to date, skip")
+    return inserted
 
 
 def seed_shipping_indices(db):
-    """BDTI estimates — skip if data already exists."""
-    existing = db.query(ShippingIndex).filter(ShippingIndex.source == "estimated").count()
-    if existing > 5:
-        print(f"  ShippingIndex: {existing} records exist, skip")
-        return 0
-
+    """BDTI estimates — fill missing dates up to today."""
+    inserted = 0
     for i in range(30, -1, -1):
         d = date.today() - timedelta(days=i)
         exist = db.query(ShippingIndex).filter(
             ShippingIndex.record_date == d, ShippingIndex.source == "estimated"
         ).first()
-        if not exist:
-            db.add(ShippingIndex(
-                record_date=d,
-                bdti=round(random.uniform(1100, 1300)),
-                td3c=round(random.uniform(900, 1100)),
-                source="estimated",
-            ))
-    db.commit()
-    print(f"  ShippingIndex: ~31 records seeded")
-    return 31
+        if exist:
+            continue
+        db.add(ShippingIndex(
+            record_date=d,
+            bdti=round(random.uniform(1100, 1300)),
+            td3c=round(random.uniform(900, 1100)),
+            source="estimated",
+        ))
+        inserted += 1
+    if inserted:
+        db.commit()
+        print(f"  ShippingIndex: {inserted} new records (up to today)")
+    else:
+        print(f"  ShippingIndex: up to date, skip")
+    return inserted
 
 
 def main():

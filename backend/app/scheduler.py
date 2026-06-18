@@ -12,6 +12,7 @@ from app.collectors.oil_price_collector import OilPriceCollector
 from app.collectors.ukmto_collector import UKMTOCollector
 from app.collectors.shipping_index_collector import ShippingIndexCollector
 from app.config import settings
+from app.database import SessionLocal
 from app.services.risk_engine import get_risk_engine
 from app.services.data_validator import get_validator
 
@@ -31,6 +32,18 @@ def register_collectors():
 
 async def run_all_collectors():
     logger.info("Scheduled collection started")
+
+    # Fill today's baseline data if missing (IEA strait/port/BDTI estimates)
+    try:
+        from seed import seed_strait_passages, seed_port_loadings, seed_shipping_indices
+        db = SessionLocal()
+        seed_strait_passages(db)
+        seed_port_loadings(db)
+        seed_shipping_indices(db)
+        db.close()
+    except Exception as e:
+        logger.warning(f"Baseline seeding skipped: {e}")
+
     results = await collector_manager.collect_all()
     for name, result in results.items():
         logger.info(f"  {name}: {result.status.value} ({result.records_count} records)")

@@ -7,8 +7,11 @@ export default function FireMapChart() {
   const [mapReady, setMapReady] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  const load = () => { fetchFireData(3).then(setFireData).catch(() => {}); };
   useEffect(() => {
-    fetchFireData(3).then(setFireData).catch(() => {});
+    load();
+    window.addEventListener('dashboard-refresh', load);
+    return () => window.removeEventListener('dashboard-refresh', load);
   }, []);
 
   // Listen for map-ready from iframe
